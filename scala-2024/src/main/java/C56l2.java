@@ -8,5 +8,9 @@ public class C56l2 {
         a = new String("abc");
         b = new String("abc");
         System.out.println(a==b);
+
+        System.out.println("abcd".contains("ab"));
+        System.out.println("abcd".contains("abd"));
+        System.out.println("abcd".indexOf("ab"));
     }
 }

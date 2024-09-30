@@ -28,3 +28,10 @@ object MyObject2{
     println(data2.min)
   }
 }
+
+object MyObject3{
+  def main(args: Array[String]): Unit = {
+    Array.tabulate(9)(i=>((i+1)*10,(i+2)*10))
+      .foreach(println)
+  }
+}
