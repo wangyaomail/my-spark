@@ -22,13 +22,18 @@
         <dependency>
             <groupId>org.ansj</groupId>
             <artifactId>ansj_seg</artifactId>
-            <version>5.1.6</version>
+            <version>${ansj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.48</version>
         </dependency>
 
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.12.10</version>
+            <version>${scala.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -60,6 +65,16 @@
             <artifactId>spark-graphx_2.12</artifactId>
             <version>${spark.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-scala_2.12</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
@@ -79,15 +94,17 @@
                     <groupId>org.glassfish</groupId>
                     <artifactId>javax.el</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                    <artifactId>jackson-module-scala_2.12</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
-        <!--
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.48.Final</version>
+            <version>${netty.version}</version>
         </dependency>
-        -->
     </dependencies>
 
     <build>

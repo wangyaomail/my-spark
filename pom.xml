@@ -10,13 +10,6 @@
     <packaging>pom</packaging>
     <name>my-spark</name>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.3</version>
-        <relativePath/>
-    </parent>
-
     <modules>
         <module>scala-2024</module>
         <module>spark-2024</module>
@@ -33,7 +26,10 @@
         <spark.version>3.4.3</spark.version>
         <scala.version>2.12.17</scala.version>
         <hbase.version>2.4.11</hbase.version>
+        <jackson.version>2.13.1</jackson.version>
         <fastjson.version>1.2.80</fastjson.version>
+        <netty.version>4.1.48.Final</netty.version>
+        <ansj.version>5.1.6</ansj.version>
     </properties>
 
     <repositories>
