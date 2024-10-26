@@ -24,3 +24,4 @@
 **.log
 **/__pycache__
 input/books_src
+output
