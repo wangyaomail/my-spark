@@ -1,6 +1,14 @@
 import java.lang.reflect.Method;
 
 public class C56l2 {
+    public static C56l2 obj = null;
+    public static C56l2 getObj(){
+        if(obj == null){
+            obj = new C56l2();
+        }
+        return obj;
+    }
+
     public static void main(String[] args) {
         String a = "abc";
         String b = "abc";
