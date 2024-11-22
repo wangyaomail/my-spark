@@ -301,3 +301,160 @@ object 平均学号 extends LoadSparkStreaming{
   }
 }
 
+object 年龄分布 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(2024 - x(4).substring(0,4).toInt , 1))
+      .groupByKey()
+      .mapValues(_.sum)
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+
+object 各省人数分布 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(6).substring(0,3), 1))
+      .groupByKey()
+      .mapValues(_.sum)
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按照电话号码排序 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(5).toLong, x(0)))
+//      .foreachRDD(_.sortBy(x=>x._1).foreach(println))
+      .transform(_.sortBy(x=>x._1))
+      .print()
+
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按学号排序 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(1).substring(2).toInt, x(0)))
+      .transform(_.sortBy(x=>x._1))
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 索引相同生日下姓名链表 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(4).substring(5), x(0)))
+      .groupByKey()
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 索引相同班级姓名链表 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(2), x(0)))
+      .groupByKey()
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 生日最大的五个同学名字 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(4).substring(5).replaceAll("-","").toInt, x(0)))
+      .foreachRDD(_.sortBy(x=>(x._1), false).take(5).foreach(println))
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 求80分以下成绩最高的3个同学姓名和成绩 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .filter(_(7).toInt<80)
+      .map(x=>(x(0), x(7)))
+      .foreachRDD(_.sortBy(x=>(x._2), false).take(2).foreach(println))
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 流拆分 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    val s1 = lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(0), x(3), x(4), x(5)))
+
+    val s2 = s1.transform(x=>{
+      x.map(y=>(y._1,y._3))
+    })
+
+    s1.print()
+    s2.print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 流合并 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    val s1 = lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(0), 1))
+
+    val s2 = s1.transform(x=>{
+      x.map(y=>(y._1, 2))
+    })
+
+    s2.join(s1).print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+
+
+
+

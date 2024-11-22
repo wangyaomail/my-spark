@@ -10,6 +10,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
 import java.net.{ServerSocket, Socket}
 import java.text.SimpleDateFormat
+import scala.collection.mutable.ListBuffer
 import scala.util.Random
 import scala.util.control.Breaks
 import scala.util.control.Breaks.breakable
@@ -285,3 +286,166 @@ object 学号均值 extends LoadStreaming {
   }
 }
 
+
+object 年龄分布 extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(2024.0-x(4).substring(0,4).toDouble,1))
+      .groupByKey()
+      .mapValues(_.sum)
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 各省人数分布 extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(6).substring(0,3),1))
+      .groupByKey()
+      .mapValues(_.sum)
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按电话号码排序 extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(5),x(0)))
+      .foreachRDD(_.sortBy(x=>x._1,true).foreach(println))
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按电话号码排序Transform extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(5),x(0)))
+      .transform(_.sortBy(x=>x._1,true))
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按学号排序 extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(1).substring(2),x(0)))
+      .foreachRDD(_.sortBy(x=>x._1,true).foreach(println))
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+
+object 索引出相同生日下同学的姓名链表 extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(4).substring(5),x(0)))
+      .groupByKey()
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+
+object 索引出相同班级同学的姓名链表 extends LoadStreaming {
+  def main(args: Array[String]): Unit = {
+    lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(2),x(0)))
+      .groupByKey()
+      .print()
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 生日最大的五个同学名字 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(4).substring(5).replaceAll("-","").toInt, x(0)))
+      .foreachRDD(_.sortBy(x=>(x._1), false).take(5).foreach(println))
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 求80分以下成绩最高的3个同学姓名和成绩 extends LoadSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .filter(_.length==8)
+      .filter(_(7).toInt<80)
+      .map(x=>(x(0), x(7)))
+      .foreachRDD(_.sortBy(x=>(x._2), false).take(2).foreach(println))
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 两个流合并 extends LoadStreaming{
+  def main(args: Array[String]): Unit = {
+    val s1 = lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(0),x(1)))
+    val s2 = lines.map(_.trim.split("\t"))
+      .filter(_.length==8)
+      .map(x=>(x(0),x(3)))
+    s1.join(s2)
+      .print()
+
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 一个流拆两个流 extends LoadStreaming{
+  def main(args: Array[String]): Unit = {
+    val s1 = lines.map(_.trim.split("\t").toList)
+      .filter(_.length==8)
+
+    val s2 = s1.transform(x=>x)
+      .map(_(3))
+
+    s1.print()
+    s2.print()
+
+
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
