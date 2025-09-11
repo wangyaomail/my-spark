@@ -12,6 +12,7 @@
 
     <modules>
         <module>scala-2024</module>
+        <module>scala-2025</module>
         <module>spark-2024</module>
     </modules>
 
