@@ -272,7 +272,7 @@ package object p10 {
 
 }
 
-package p1{
+package jp1{
   class a {
 
   }
