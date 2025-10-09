@@ -30,10 +30,10 @@ class LoadSpark{
   val sc = new SparkContext("local", "myapp", System.getenv("SPARK_HOME"))
   sc.setLogLevel("ERROR")
   val localPath = new File("").getAbsolutePath()
-  val file = sc.textFile(localPath+"/input/students.data")
+  val file = sc.textFile(localPath+"/input/students_10w.data")
     .map(_.trim.split("\t"))
     .filter(_.length==8)
-  file.foreach(println)
+//  file.foreach(println)
 }
 
 object 男女生人数 extends LoadSpark {
@@ -76,11 +76,17 @@ object 不同的出生月份 extends LoadSpark{
   }
 }
 
+object 求最高分最低分 extends LoadSpark{
+  def main(args: Array[String]): Unit = {
+    println("最高分",file.map(_(7).toInt).max)
+    println("最低分",file.map(_(7).toInt).min)
+  }
+}
+
 object 平均年龄 extends LoadSpark{
   def main(args: Array[String]): Unit = {
-    val ageSum = file.map(2024.0 - _(4).substring(0,4).toDouble)
+    val ageSum = file.map(2025.0 - _(4).substring(0,4).toDouble)
       .sum()
-
     println("平均年龄", ageSum/file.count())
   }
 }
