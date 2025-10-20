@@ -1,5 +1,4 @@
-package c78
-package t1
+package nlp
 
 import com.alibaba.fastjson.JSON
 import org.ansj.splitWord.analysis.BaseAnalysis
@@ -131,7 +130,7 @@ object 热点标签 extends NlpBase {
   }
 }
 
-object 热点标签_content extends NlpBase {
+object 高频词 extends NlpBase {
   def main(args: Array[String]): Unit = {
     val pattern = new Regex("[\\u4E00-\\u9FA5]+")
     data.map(x=>(x.content))
@@ -139,6 +138,29 @@ object 热点标签_content extends NlpBase {
         .parse(_)
         .getTerms
         .asScala
+        .map(_.getName)
+        .toList)
+      .flatten
+      .filter(_.size>1)
+      .filter(x=>pattern.findFirstIn(x).size>0)
+      .groupBy(x=>x)
+      .map(x=>(x._1,x._2.size))
+      .toList.sortBy(_._2)
+      .reverse
+      .take(10)
+      .foreach(println)
+  }
+}
+
+object 高频名词 extends NlpBase {
+  def main(args: Array[String]): Unit = {
+    val pattern = new Regex("[\\u4E00-\\u9FA5]+")
+    data.map(x=>(x.content))
+      .map(BaseAnalysis
+        .parse(_)
+        .getTerms
+        .asScala
+        .filter(_.getNatureStr=="n")
         .map(_.getName)
         .toList)
       .flatten
@@ -186,11 +208,10 @@ object 标题平均字数 extends NlpBase {
     println(t.sum.toDouble/t.size)
   }
 }
-//1. 统计不同长度标题的平均点赞数并排序
 
-object 统计不同长度标题的平均点赞数并排序 extends NlpBase {
+object 统计不同长度标题的平均点赞数并排序 extends NlpBase{
   def main(args: Array[String]): Unit = {
-    data.map(x=>(x.title.length, x.star))
+    data.map(x=>(x.title.length,x.star))
       .groupBy(_._1)
       .map(x=>(x._1,{
         var r = x._2.map(_._2)
@@ -203,36 +224,18 @@ object 统计不同长度标题的平均点赞数并排序 extends NlpBase {
       .foreach(println)
   }
 }
-// 难度2：在1的基础上，统计中尝试去掉异常值：
+
+//难度2：在1的基础上，统计中尝试去掉异常值：
 //去掉每个长度下点赞最多的和最少的
 //去掉问题的回答少于3个的
-
-object 统计不同长度标题的平均点赞数并排序难度2 extends NlpBase {
+object 统计不同长度标题的平均点赞数并排序难度2 extends NlpBase{
   def main(args: Array[String]): Unit = {
-    data.map(x=>(x.title.length, x.star))
+    data.map(x=>(x.title.length,x.star))
       .groupBy(_._1)
-      .filter(_._2.size>2)
+      .filter(_._2.size>=3)
       .map(x=>(x._1,{
         var r = x._2.map(_._2)
-        (r.sum-r.max - r.min).toDouble/(r.size-2)
-      }))
-      .toList
-      .sortBy(_._2)
-      .reverse
-      .take(10)
-      .foreach(println)
-  }
-}
-//难度3：在2的基础上，统计不同长度区间的（如长11则统计10-12的）
-object 统计不同长度标题的平均点赞数并排序难度3 extends NlpBase {
-  def main(args: Array[String]): Unit = {
-    var d = data.map(x=>(x.title.length, x.star))
-      d = d ++ d.map(x=>(x._1-1,x._2)) ++ d.map(x=>(x._1+1,x._2))
-      d.groupBy(_._1)
-      .filter(_._2.size>2)
-      .map(x=>(x._1,{
-        var r = x._2.map(_._2)
-        (r.sum-r.max - r.min).toDouble/(r.size-2)
+        (r.sum-r.max-r.min).toDouble/(r.size-2)
       }))
       .toList
       .sortBy(_._2)
@@ -242,103 +245,159 @@ object 统计不同长度标题的平均点赞数并排序难度3 extends NlpBas
   }
 }
 
+//难度3：在2的基础上，统计不同长度区间的（如长11则统计10-12的）
+// List() ++ List()
+object 统计不同长度标题的平均点赞数并排序难度3 extends NlpBase{
+  def main(args: Array[String]): Unit = {
+//    var l = List(("a",1),("b",2),("b",2),("b",2),("b",2))
+//    var l2 = l.map(_._2)
+//    for(i<-Range(1,l.length)){
+//      l2(i) = l2(i) + l2(i-1) + l2(i+1)
+//    }
+//    println(l)
+
+    var d = data.map(x=>(x.title.length,x.star))
+    (d ++ d.map(x=>(x._1-1,x._2)) ++ d.map(x=>(x._1+1,x._2)))
+      .groupBy(_._1)
+      .filter(_._2.size>=3)
+      .map(x=>(x._1,{
+        var r = x._2.map(_._2)
+        (r.sum-r.max-r.min).toDouble/(r.size-2)
+      }))
+      .toList
+      .sortBy(_._2)
+      .reverse
+      .take(10)
+      .foreach(println)
+  }
+}
 object 热点行业 extends NlpBase{
   def main(args: Array[String]): Unit = {
-//    var d1 = data.map(x=>(if(x.content.contains("计算机")) "计算机"))
-//    var d2 = data.map(x=>(if(x.content.contains("纺织")) "纺织"))
-//    (d1 ++ d2).filter(_.!=()) .foreach(println)
-    data.map(x=>x.content)
-      .map(x=>
-        Set("计算机","纺织","金融","农业")
-          .filter(x.contains)
-      )
+//    var l1 = data.filter(_.content.contains("计算机")).map(x=>"计算机")
+//    var l2 = data.filter(_.content.contains("纺织")).map(x=>"纺织")
+//    var l3 = data.filter(_.content.contains("金融")).map(x=>"金融")
+    data.map(_.content)
+      .map(x=>Set("计算机",
+        "纺织",
+        "金融",
+        "农业",
+        "房地产",
+        "餐饮",
+        "旅游").filter(x.contains))
       .filter(_.size>0)
       .flatten
-      .map((_,1))
+      .groupBy(x=>x)
+      .map(x=>(x._1,x._2.size))
+      .toList.sortBy(_._2)
+      .foreach(println)
+  }
+}
+
+object 回答情感分析 extends NlpBase {
+  def main(args: Array[String]): Unit = {
+    var posDict = Source.fromFile("input/dict/正面词.dict")
+      .getLines()
+      .toSet
+    var negDict = Source.fromFile("input/dict/负面词.dict")
+      .getLines()
+      .toSet
+
+    var md = data.map(x=>(x.qid+"_"+x.title+"_"+x.answer_id, x.content))
+      .map(x=>
+        BaseAnalysis
+          .parse(x._2)
+          .getTerms
+          .asScala
+          .map(_.getName)
+          .toList
+          .map(y=>(x._1,y))
+      )
+      .flatten
+      .map(x=>(x._1,{
+        if(posDict.contains(x._2)) 1
+        else if (negDict.contains(x._2)) -1
+        else 0
+      }))
       .groupBy(_._1)
-      .map(x => (x._1, x._2.map(_._2).sum))
+      .map(x=>(x._1,x._2.map(_._2).sum))
       .toList
       .sortBy(_._2)
       .reverse
-      .take(10)
-      .foreach(println)
+    println("最正面",md.take(10))
+    println("最负面",md.takeRight(10))
+
   }
 }
 
-object 高频名词 extends NlpBase{
+object 问题情感分析 extends NlpBase {
   def main(args: Array[String]): Unit = {
-    val pattern = new Regex("[\\u4E00-\\u9FA5]+")
-    data.map(x=>(x.content))
-      .map(BaseAnalysis
-        .parse(_)
-        .getTerms
-        .asScala
-        .filter(_.getNatureStr == "n")
-        .map(_.getName)
-        .toList)
-      .flatten
-      .filter(_.size>1)
-      .filter(x=>pattern.findFirstIn(x).size>0)
-      .groupBy(x=>x)
-      .map(x=>(x._1,x._2.size))
-      .toList.sortBy(_._2)
-      .reverse
-      .take(10)
-      .foreach(println)
-  }
-}
-
-object 高频用户 extends NlpBase {
-  def main(args: Array[String]): Unit = {
-    val pattern = new Regex("[\\u4E00-\\u9FA5]+")
-    data.map(x=>(x.topic))
-      .map(BaseAnalysis
-        .parse(_)
-        .getTerms
-        .asScala
-        .filter(_.getNatureStr == "n")
-        .map(_.getName)
-        .toList)
-      .flatten
-      .filter(_.size>1)
-      .filter(x=>pattern.findFirstIn(x).size>0)
-      .groupBy(x=>x)
-      .map(x=>(x._1,x._2.size))
-      .toList.sortBy(_._2)
-      .reverse
-      .take(10)
-      .foreach(println)
-  }
-}
-
-object 情感分析 extends NlpBase{
-  def main(args: Array[String]): Unit = {
-    val pos_dict = Source
-      .fromFile("input/dict/正面词.dict", "UTF-8")
+    var posDict = Source.fromFile("input/dict/正面词.dict")
       .getLines()
       .toSet
-    val neg_dict = Source
-      .fromFile("input/dict/负面词.dict", "UTF-8")
+    var negDict = Source.fromFile("input/dict/负面词.dict")
       .getLines()
       .toSet
-    println("正面词",pos_dict.take(10))
-    println("负面词",neg_dict.take(10))
-    import scala.collection.JavaConverters._
-    val answerSentiment = data
-      .map(x=>(x.answer_id, x.content))
-      .map(x=>(x._1, BaseAnalysis.parse(x._2).getTerms().asScala.map(_.getName)))
-      .map(x=>(x._1, x._2.map(a=>{if(pos_dict.contains(a)) 1 else if(neg_dict.contains(a)) -1 else 0 })))
-      .map(x=>(x._1, x._2.fold(0)(_+_)))
+
+    var md = data.map(x=>(x.qid+"_"+x.title, x.content))
+      .map(x=>
+        BaseAnalysis
+          .parse(x._2)
+          .getTerms
+          .asScala
+          .map(_.getName)
+          .toList
+          .map(y=>(x._1,y))
+      )
+      .flatten
+      .map(x=>(x._1,{
+        if(posDict.contains(x._2)) 1
+        else if (negDict.contains(x._2)) -1
+        else 0
+      }))
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.map(_._2).sum))
+      .toList
       .sortBy(_._2)
-    println("最正面的答案",answerSentiment.takeRight(3).toList)
-    println("最负面的答案",answerSentiment.take(3).toList)
+      .reverse
+    println("最正面",md.take(10))
+    println("最负面",md.takeRight(10))
+
   }
 }
 
+object 用户情感分析 extends NlpBase {
+  def main(args: Array[String]): Unit = {
+    var posDict = Source.fromFile("input/dict/正面词.dict")
+      .getLines()
+      .toSet
+    var negDict = Source.fromFile("input/dict/负面词.dict")
+      .getLines()
+      .toSet
 
+    var md = data.map(x=>(x.answerer_tags, x.content))
+      .map(x=>
+        BaseAnalysis
+          .parse(x._2)
+          .getTerms
+          .asScala
+          .map(_.getName)
+          .toList
+          .map(y=>(x._1,y))
+      )
+      .flatten
+      .map(x=>(x._1,{
+        if(posDict.contains(x._2)) 1
+        else if (negDict.contains(x._2)) -1
+        else 0
+      }))
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.map(_._2).sum))
+      .toList
+      .sortBy(_._2)
+      .reverse
+    println("最正面",md.take(10))
+    println("最负面",md.takeRight(10))
 
-
-
-
-
+  }
+}
 

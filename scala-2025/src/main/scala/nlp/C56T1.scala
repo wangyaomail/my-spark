@@ -130,5 +130,56 @@ object 热点标签 extends NlpBase {
       .foreach(println)
   }
 }
+// 对正文+title处理标签
+object 热点标签content extends NlpBase {
+  def main(args: Array[String]): Unit = {
+    // 按分词后的标签
+    (data.map(x=>x.content) ++ data.map(x=>x.title))
+      .map(BaseAnalysis
+        .parse(_)
+        .getTerms
+        .asScala
+        .map(_.getName)
+        .toList
+        .filter(_.length>1)
+      )
+      .flatten
+      .map((_,1))
+      .toList
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.size))
+      .toList
+      .sortBy(_._2)
+      .reverse
+      .take(10)
+      .foreach(println)
+  }
+}
 
+object 高赞用户 extends NlpBase{
+  def main(args: Array[String]): Unit = {
+    data.map(x=>(x.answerer_tags, x.star))
+      .toList
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.map(_._2).sum))
+      .toList
+      .sortBy(_._2)
+      .reverse
+      .take(5)
+      .foreach(println)
+  }
+}
+//标题平均字数（小数）
+
+object 平均标题字数 extends NlpBase{
+  def main(args: Array[String]): Unit = {
+    var t = data.map(x=>(x.title.length, x.qid, x.title))
+    t.toList.sortBy(_._1)
+      .reverse
+      .take(100)
+      .foreach(println)
+    println(t.map(_._1).sum/ t.size)
+//    println(t.sum.toDouble/t.size)
+  }
+}
 
