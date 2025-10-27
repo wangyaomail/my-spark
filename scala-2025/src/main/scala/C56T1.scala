@@ -75,6 +75,13 @@ world
 
 }
 
+object ttt {
+  def main(args: Array[String]): Unit = {
+    val a = Array(1,2,3)
+//    println(a*2)
+    println("a"*2)
+  }
+}
 
 
 
