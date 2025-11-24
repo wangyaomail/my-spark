@@ -204,3 +204,67 @@ object 平均年龄 extends LoadSparkSQL{
       """).show()
   }
 }
+
+object 求学生的年龄分布 extends LoadSparkSQL{
+  def main(args: Array[String]): Unit = {
+    ss.sql(
+      """select
+            t.age,
+            count(*)
+         from
+         (
+            select
+              2025-int(substr(birthday,0,4)) as age
+            from students
+         ) t
+         group by t.age
+      """).show()
+  }
+}
+
+object 求生日各月的分布 extends LoadSparkSQL{
+  def main(args: Array[String]): Unit = {
+    ss.sql(
+      """select
+            t.m,
+            count(*)
+         from
+         (
+            select
+              substr(birthday,6,2) as m
+            from students
+         ) t
+         group by t.m
+      """).show()
+  }
+}
+
+object 按照同学们电话号码的大小排序 extends LoadSparkSQL{
+  def main(args: Array[String]): Unit = {
+    ss.sql(
+      """
+         select phone,name
+         from students
+         order by phone desc
+      """).show()
+  }
+}
+
+object 按手机号后4位排序输出姓名和手机号 extends LoadSparkSQL{
+  def main(args: Array[String]): Unit = {
+    ss.sql(
+      """
+         select phone,name
+         from students
+         order by right(phone,4) desc
+      """).show()
+  }
+}
+
+
+
+
+
+
+
+
