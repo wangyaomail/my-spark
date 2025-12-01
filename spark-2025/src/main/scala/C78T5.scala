@@ -5,9 +5,7 @@ import c56.t5.写json.data
 import c56.t5.写orc.data
 import c56.t5.写parquet.data
 import c56.t5.读json.ss
-package t5
 
-import c78.t5.写入Mysql.data
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.functions.{rand, randn}
 import org.apache.spark.sql.{Column, SaveMode, SparkSession}
