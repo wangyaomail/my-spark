@@ -248,4 +248,135 @@ object 求学生中出现的所有姓氏 extends StuBaseClass{
   }
 }
 
+object 求平均年龄 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>(2025-x(4).substring(0,4).toInt,1))
+      .reduce((x,y)=>(x._1+y._1, x._2+y._2))
+      .map(x=>(x._1,x._2,x._1/x._2))
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 手机号后四位均值 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>(x(5).takeRight(4).toInt,1))
+      .reduce((x,y)=>(x._1+y._1, x._2+y._2))
+      .map(x=>(x._1,x._2,x._1/x._2))
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 求年龄分布 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>(2025-x(4).substring(0,4).toInt,1))
+      .groupByKey()
+      .map(x=>(x._1,x._2.sum))
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按照同学们电话号码的大小排序 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>x(5))
+      .foreachRDD(y=>y.sortBy(z=>z, false).foreach(println))
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 按门牌号排序输出学生名字和住址 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>x(6).takeRight(4).take(3))
+      .foreachRDD(y=>y.sortBy(z=>z, false).foreach(println))
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 索引出相同生日下同学的姓名链表 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>(x(4).substring(5),x(0)))
+      .groupByKey()
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 求出生日最大的2个同学的名字 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>(x(4).substring(5),"00-00"))
+      .reduce((x,y)=>(
+        if(x._1<y._1)
+          (y._1,x._2)
+        else if(x._2<y._1) (x._1, y._1)
+        else (x._1,x._2)
+        ))
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 求手机号各位数字之和最大的2个同学 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>((x(5).map(_.toInt-'0'.toInt).sum,x(0)),(0,"")))
+      .reduce((x,y)=>(
+        if(x._1._1<y._1._1)
+          (y._1,x._2)
+        else if(x._2._1<y._1._1) (x._1, y._1)
+        else (x._1,x._2)
+        ))
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 流合并 extends StuBaseClass {
+  def main(args: Array[String]): Unit = {
+    val name_id = lines.map(_.split("\t")).map(x => (x(0), x(1)))
+    val name_gender = lines.map(_.split("\t")).map(x => (x(0), x(3)))
+    name_id.join(name_gender)
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
+object 原生算子 extends StuBaseClass{
+  def main(args: Array[String]): Unit = {
+    lines.map(_.split("\t"))
+      .map(x=>x(5))
+      .transform(x=>x.sortBy(z=>z, false))
+      .print()
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
+
 
