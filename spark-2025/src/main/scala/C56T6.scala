@@ -1,15 +1,25 @@
 package c56
 package t6
 
+import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerConfig, ProducerRecord}
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.expr
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.storage.StorageLevel
+import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
+import org.apache.spark.streaming.kafka010.KafkaUtils
+import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import java.io.{BufferedReader, File, InputStreamReader, PrintStream}
 import java.net.{ServerSocket, Socket}
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.util
+import java.util.Properties
 import scala.util.Random
 import scala.util.control.Breaks
 import scala.util.control.Breaks.breakable
@@ -379,4 +389,112 @@ object 原生算子 extends StuBaseClass{
   }
 }
 
+class BaseStructuredSparkStreaming extends LoadHadoop {
+    val ss = SparkSession.builder
+      .master("local[1]")
+      .getOrCreate()
+    ss.sparkContext.setLogLevel("ERROR")
+    val lines = ss.readStream
+      .format("socket")
+      .option("host", "localhost")
+      .option("port", 7777)
+      .load()
+    lines.selectExpr("split(value,'\t') as stu")
+      .withColumn("name", expr("stu[0]"))
+      .withColumn("no", expr("stu[1]"))
+      .withColumn("cls", expr("stu[2]"))
+      .withColumn("gender", expr("stu[3]"))
+      .withColumn("birthday", expr("stu[4]"))
+      .withColumn("phone", expr("stu[5]"))
+      .withColumn("loc", expr("stu[6]"))
+      .withColumn("score", expr("stu[7]"))
+      .drop("stu")
+      .createTempView("students")
+}
 
+object 统计男生信息 extends BaseStructuredSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    ss
+      .sql("select * from students where gender='男'")
+      .writeStream
+      .outputMode("append")
+      .format("console")
+      .trigger(Trigger.ProcessingTime("3 seconds"))
+      .start()
+      .awaitTermination()
+  }
+}
+
+
+object 统计男女生数量 extends BaseStructuredSparkStreaming{
+  def main(args: Array[String]): Unit = {
+    ss
+      .sql("select gender,count(*) from students group by gender")
+      .writeStream
+      .outputMode("complete")
+      .format("console")
+      .trigger(Trigger.ProcessingTime("3 seconds"))
+      .start()
+      .awaitTermination()
+  }
+}
+
+object Kafka基本Producer {
+  def main(args: Array[String]): Unit = {
+    val props = new Properties()
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.17.150:9092")
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer")
+    val producer = new KafkaProducer[String, String](props)
+    producer.send(new ProducerRecord[String, String]("topic-2", "key1", "value1"))
+    producer.send(new ProducerRecord[String, String]("topic-2", "key2", "value2"))
+    producer.send(new ProducerRecord[String, String]("topic-2", "key3", "value3"))
+    producer.close()
+  }
+}
+
+object Kafka基本Consumer {
+  def main(args: Array[String]): Unit = {
+    val props = new Properties()
+    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.17.150:9092")
+    props.put(ConsumerConfig.GROUP_ID_CONFIG, "group-1")
+    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
+    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
+    val consumer = new KafkaConsumer[String, String](props)
+    consumer.subscribe(util.Arrays.asList("topic-1"))
+    try {
+      while (true) {
+        val records = consumer.poll(Duration.ofSeconds(1))
+        records.forEach(record => println(s"offset = ${record.offset}, key = ${record.key}, value = ${record.value}"))
+      }
+    } finally {
+      consumer.close()
+    }
+  }
+}
+
+object 基本SparkStreaming连接Kafka extends LoadHadoop {
+  def main(args: Array[String]): Unit = {
+    val sc = new SparkContext("local[2]", "myapp", System.getenv("SPARK_HOME"))
+    sc.setLogLevel("ERROR")
+    val ssc = new StreamingContext(sc, Seconds(1))
+    val kafkaParams = Map[String, Object](
+      "bootstrap.servers" -> "zzti:9092",
+      "key.deserializer" -> classOf[StringDeserializer],
+      "value.deserializer" -> classOf[StringDeserializer],
+      "group.id" -> "group-1",
+      "auto.offset.reset" -> "latest",
+      "enable.auto.commit" -> (true: java.lang.Boolean)
+    )
+    val topics = Set("topic-2")
+    val stream = KafkaUtils.createDirectStream[String, String](
+      ssc,
+      PreferConsistent,
+      Subscribe[String, String](topics, kafkaParams)
+    )
+    stream.foreachRDD(_.foreach(println))
+    ssc.start()
+    ssc.awaitTermination()
+    ssc.stop()
+  }
+}
