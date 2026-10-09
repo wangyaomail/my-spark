@@ -1,4 +1,4 @@
-package c34
+package c34.l03
 
 class a1{}
 object a1{}
@@ -26,7 +26,7 @@ object a4 {
     println(a.name)
   }
 }
-import c34.a.b.a5
+import c34.l03.a.b.a5
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
