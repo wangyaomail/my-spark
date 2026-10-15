@@ -258,4 +258,135 @@ object a15 {
   }
 }
 
+object a16 {
+  def main(args: Array[String]): Unit = {
+    // sortby
+    val nums = List(5,8,3,5,7)
+    val sorted = nums.sorted //List(1,2,3,4)
+    val users = List(("HomeWay", 25), ("XSDYM", 23))
+    val sortedByAge = users.sortBy {x=>x._2} //List(("XSDYM",23),("HomeWay",25))
+    val sortedWith = users.sortWith { case (user1, user2) => user1._2 < user2._2 } //List(("XSDYM",23),("HomeWay",25))
+    println(sorted,sortedWith,sortedByAge)
+  }
+}
+
+object a17 {
+  def main(args: Array[String]): Unit = {
+    var l = List(1,2,3,4,5,6,7,8)
+    println(l.filter(_%3==0))
+    println(l.count(_%2==0), l.sum, l.size, l.length)
+  }
+}
+
+object a18 {
+  def main(args: Array[String]): Unit = {
+    { // diff
+      val nums1 = List(1, 2, 3)
+      val nums2 = List(2, 3, 4)
+      val diff1 = nums1 diff nums2 // List(1)
+      val diff2 = nums2.diff(nums1) // List(4)
+      val union1 = nums1 union nums2 // List(1,2,3,2,3,4)
+      val union2 = nums2 ++ nums1 // List(2,3,4,1,2,3)
+      val intersection = nums1 intersect nums2 //List(2,3)
+      println(diff1,diff2,union1,union2,intersection)
+      println(union1.distinct)
+      println(union1.map((_,1)).groupBy(_._1).map(_._1))
+    }
+  }
+}
+
+object a19 {
+  def main(args: Array[String]): Unit = {
+    // groupby
+    val data = List(
+      ("HomeWay", "Male"),
+      ("XSDYM", "Female"),
+      ("Mr.Wang", "Male"))
+    val group1 = data.groupBy(_._2)
+    // = Map("Male" -> List(("HomeWay","Male"),("Mr.Wang","Male")),"Female" -> List(("XSDYM","Femail")))
+    val group2 = data.groupBy { case (name, sex) => sex }
+    // = Map("Male" -> List(("HomeWay","Male"),("Mr.Wang","Male")),"Female" -> List(("XSDYM","Femail")))
+    val fixSizeGroup = data.grouped(2).toList
+    // = Map("Male" -> List(("HomeWay","Male"),("XSDYM","Femail")),"Female" -> List(("Mr.Wang","Male")))
+    println(group1,group2,fixSizeGroup)
+  }
+}
+
+object a20 {
+  def main(args: Array[String]): Unit = {
+    var l = List(1,2,3,4,5)
+    println(l.scan(0)(_+_))
+    println(l.reduce(_+_))
+  }
+}
+
+object a21 {
+  def main(args: Array[String]): Unit = {
+    var l = List(1,2,3,4,5)
+    println(l.take(3), l.takeRight(2))
+    println(l.takeWhile(_<3))
+  }
+}
+
+object a22 {
+  def main(args: Array[String]): Unit = {
+    var l = List(1,2,3,4,5)
+    println(l.drop(3), l.dropRight(2))
+    println(l.dropWhile(_<3))
+  }
+}
+
+object a23 {
+  def main(args: Array[String]): Unit = {
+    // span
+    val nums = List(1, 1, 1, 2, 3, 2, 1)
+    val (prefix1, suffix1) = nums.span(_ == 1) // prefix = List(1,1,1), suffix = List(2,3,2,1)
+    val (prefix2, suffix2) = nums.splitAt(3) // prefix = List(1,1,1), suffix = List(2,3,2,1)
+    val (prefix3, suffix3) = nums.partition(_ == 1) // prefix = List(1,1,1), suffix = List(2,3,2)
+    println((prefix1, suffix1))
+    println((prefix2, suffix2))
+    println((prefix3, suffix3))
+    println(nums.padTo(10,99))
+  }
+}
+
+object a24 {
+  def main(args: Array[String]): Unit = {
+    // zip
+    val alphabet = List("A", "B", "C")
+    val nums = List(1, 2)
+    val zipped = alphabet zip nums // List(("A",1),("B",2))
+    val zipped2 = alphabet.zip(nums)
+    val zippedAll = alphabet.zipAll(nums, "*", -1) // List(("A",1),("B",2),("C",-1))
+    val zippedIndex = alphabet.zipWithIndex // List(("A",0),("B",1),("C",3))
+    val (list1, list2) = zipped.unzip // list1 = List("A","B"), list2 = List(1,2)
+    val (l1, l2, l3) = List((1, "one", '1'), (2, "two", '2'), (3, "three", '3')).unzip3
+    // l1=List(1,2,3),l2=List("one","two","three"),l3=List('1','2','3')
+    println(zipped)
+    println(zippedAll)
+    println(zippedIndex)
+    println(list1, list2)
+    println(l1, l2, l3)
+  }
+}
+
+object a25 {
+  def main(args: Array[String]): Unit = {
+    val l = List(1,2,3,4,5,6)
+    println(l.slice(2,4))
+  }
+}
+
+object a26 {
+  def main(args: Array[String]): Unit = {
+    var l = List(1,2,3,4,5,6)
+    l = l.updated(3,99)
+    println(l)
+  }
+}
+
+
+
+
+
 
