@@ -148,3 +148,54 @@ object 求出生日最大的5个同学的名字 extends StuBase {
       .foreach(println)
   }
 }
+
+object 生日的年月日的数值和是奇数的同学比偶数的同学多几人 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    val d = data.map(x=>x(4).split("-").toList)
+      .map(x=>(x(0).toInt+x(1).toInt+x(2).toInt)%2)
+      .map((_,1))
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.length)).toList
+    println(d(0),d(1),d(0)._2-d(1)._2)
+  }
+}
+
+object 韩命古同学在他们班排第几 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    val d = data.map(x=>(x(0),x(1),x(7)))
+      .groupBy(_._2)
+      .filter(x=>x._2.filter(y=>y._1=="韩命古").size>0)
+      .map(_._2).toList(0)
+      .sortBy(_._3)
+      .reverse
+    d.zip(Range(1,d.size))
+      .filter(_._1._1 == "韩命古")
+      .foreach(println)
+  }
+}
+
+object 手机号后N位重复的人 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    data.map(x=>(x(5).substring(4),1))
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.size))
+      .filter(_._2>0)
+      .toList
+      .sortBy(_._2)
+      .foreach(println)
+  }
+}
+
+class 西瓜 {
+    val data = Source.fromFile("input/xigua3.0.csv")
+      .getLines()
+      .map(_.split(",").toList)
+      .drop(1)
+}
+
+object 平均密度 extends 西瓜 {
+  def main(args: Array[String]): Unit = {
+    val midu = data.map(x=>x(7).toDouble).toList
+    println(midu.sum/midu.length, midu)
+  }
+}

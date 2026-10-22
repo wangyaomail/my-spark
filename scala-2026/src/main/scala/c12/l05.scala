@@ -134,3 +134,71 @@ object 对山西省的同学的成绩排序 extends StuBase {
   }
 }
 
+
+object 山东门牌号最高的3个人名字 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    data.map(x=>(x(6).takeRight(4).take(3),x(0)))
+      .sortBy(_._1).reverse.take(3)
+      .foreach(println(_))
+  }
+}
+
+object 焦作市成绩最高的三人姓名 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    data.map(x=>(x(6),x(0),x(7)))
+      .filter(_._1.contains("焦作"))
+      .sortBy(_._3).reverse.take(3)
+      .foreach(println(_))
+  }
+}
+
+object 生日的年月日的数值和是奇数的同学比偶数的同学多几人 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    val d = data.map(x=>(x(4).split("-").toList))
+      .map(x=>((x(0).toInt+x(1).toInt+x(2).toInt)%2,1))
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.size))
+    println(d,d.get(1).toList(0)-d.get(0).toList(0))
+  }
+}
+
+object 韩命古同学在他们班排第几 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    val d1 = data.map(x=>(x(0),x(1),x(7)))
+      .filter(_._1=="韩命古").toList(0)._2
+    val d2 = data.map(x=>(x(0),x(1),x(7)))
+      .filter(_._2.contains(d1))
+      .sortBy(_._3)
+      .reverse
+    d2.zip(Range(1,d2.size))
+      .filter(_._1._1=="韩命古")
+      .foreach(println(_))
+  }
+}
+
+
+object 韩命古同学在他们班排第几2 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    val d1 = data.map(x=>(x(0),x(1),x(7)))
+      .groupBy(_._2)
+      .filter(_._2.map(_._1).filter(_=="韩命古").size>0)
+      .map(_._2.toList).toList(0)
+      .sortBy(_._3)
+      .reverse
+    d1.zip(Range(1,d1.size))
+      .filter(_._1._1=="韩命古")
+      .foreach(println(_))
+  }
+}
+
+object 手机号后N位重复的人 extends StuBase {
+  def main(args: Array[String]): Unit = {
+    data.map(x=>(x(5).takeRight(6),1))
+      .groupBy(_._1)
+      .map(x=>(x._1,x._2.size))
+      .toList.sortBy(_._2).reverse
+      .foreach(println)
+  }
+}
+
+
