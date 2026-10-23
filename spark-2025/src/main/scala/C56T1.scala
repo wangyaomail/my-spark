@@ -16,7 +16,7 @@ object WordCountScala {
       .sortBy(_._2,false)
 //      .take(10)
       .collect()
-//      .foreach(println)
+      .foreach(println)
   }
 }
 
