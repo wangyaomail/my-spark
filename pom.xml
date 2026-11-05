@@ -16,6 +16,7 @@
         <module>scala-2026</module>
         <module>spark-2024</module>
         <module>spark-2025</module>
+        <module>spark-2026</module>
     </modules>
 
     <properties>
